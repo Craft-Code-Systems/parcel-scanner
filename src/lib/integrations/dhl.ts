@@ -86,24 +86,103 @@ export async function f_scan(TOKEN: string, COOKIE: string, BARCODE: string): Pr
         "barcode": BARCODE
     };
 
-
-    // const options = {
-    //     method: 'POST',
-    //     headers: {
-    //       cookie: 'X-AUTH-TOKEN=eyJ1c2VySWQiOiJkMmMxZGM3Yi0wNDAwLTRhNTMtYmRkYS05MmNiNGY2NzY0YWIiLCJuYW1lIjp7ImZpcnN0TmFtZSI6Ikluc3RhbnRwYWNrIiwibGFzdE5hbWUiOiJTUCJ9LCJlbWFpbCI6ImluZm9AaW5zdGFudHBhY2submwiLCJyb2xlcyI6WyJBcGlHYXRld2F5VXNlciIsIlNlcnZpY2Vwb2ludE1hbmFnZXIiLCJTaGlwbWVudHNNYW5hZ2VyVXNlciIsIlVzZXIiXSwicGFyY2VsU2hvcFBzZktleSI6Ik5MLTQxOTEwMSIsInBhcmNlbFNob3BTZXJ2aWNlcyI6WyJjb25zdW1lci1pbnRlcnZlbnRpb25zIiwiZmlyc3RtaWxlIiwibGFzdG1pbGUiLCJvdGMiLCJwcmludGxlc3MiLCJzcGEiXSwiaXNzdWVkQXQiOjE3Mzg2NTk0ODQ3NTUsImV4cGlyZXNBdCI6MTc0NjQzNTQ4NDc1NSwib3JpZ2luIjoiZGhsIiwidXNlclR5cGUiOiJwYXJjZWxTaG9wIn07MTE4MTEzLTQ4MjkyMDQ5NTYzNS0xMTczNi0zNTIwLTkzLTQyNzYzMzE0LTEwNDcwLTU5LTMyLTI1LTMxLTExODE4MjUxNjMzNjU0MC0yNjMx; XSRF-TOKEN=-2310315-10514118-83-89-32-9749-1115241-1-126-4212066-1771-106-1036865-119114-318911619-73; X-MIGRATED-TO-HOST=; _cfuvid=XkBsTTSsuiJo1iX4NQ2BD5NThw39FAPQHGbawP17Xuk-1738663701693-0.0.1.1-604800000',
-    //       'Content-Type': 'application/json',
-    //       'User-Agent': 'insomnia/10.3.0',
-    //       'x-xsrf-token': '-2310315-10514118-83-89-32-9749-1115241-1-126-4212066-1771-106-1036865-119114-318911619-73'
-    //     },
-    //     body: '{"barcode":"JVGL06213730001221178493"}'
-    //   };
-      
-    //   await fetch('https://my.dhlecommerce.nl/servicepoint-api/customer/hand-in/validate', options)
-    //     .then(response => response.json())
-    //     .then(response => console.log("response: ", response))
-    //     .catch(err => console.error("error", err));
-
     const RESULT = (await f_wrpd_postData('servicepoint-api/customer/hand-in/validate', DATA, TOKEN, COOKIE)).return_value ;
+
+    if (RESULT[0].key){
+        Log.f_msg(PAGE_NAME, "f_scan", RESULT[0].key, 1);
+        return null;
+    } else {
+        return RESULT[0];
+    }
+
+}
+
+// https://my.dhlecommerce.nl/servicepoint-api/package/info
+
+// {"barcode":"JVGL06290308000132094552"}
+
+// {
+//     "shipper": {
+//         "name": "Mewave NL",
+//         "address": {
+//             "street": "DE RING",
+//             "houseNumber": "36",
+//             "houseNumberAddition": null,
+//             "postalCode": "5261LM",
+//             "city": "VUGHT",
+//             "country": "NL"
+//         },
+//         "email": null
+//     },
+//     "receiver": {
+//         "name": "Lisa Killian",
+//         "address": {
+//             "street": "Gaffel",
+//             "houseNumber": "37",
+//             "houseNumberAddition": null,
+//             "postalCode": "3863VZ",
+//             "city": "Nijkerk",
+//             "country": "NL"
+//         },
+//         "notificationMethod": {
+//             "email": "lili-an96@hotmail.com"
+//         }
+//     }
+// }
+
+
+export async function f_handin(TOKEN: string, COOKIE: string, env: any, BARCODES: string[]): Promise<any> {
+
+    // {
+    //     "shipper": {
+    //         "countryCode": "",
+    //         "postalCode": "",
+    //         "houseNumber": "",
+    //         "houseNumberSuffix": "",
+    //         "street": "",
+    //         "city": "",
+    //         "suburb": "",
+    //         "additionalAddressLine": ""
+    //     },
+    //     "parcels": [
+    //         {
+    //             "id": "c51b69fc-b8c7-4e7c-9e42-658f7b339cb9",
+    //             "parcelKind": "Standard",
+    //             "receiverName": "Lisa Killian",
+    //             "barcode": "JVGL06290308000132094552"
+    //         }
+    //     ],
+    //     "receipt": {
+    //         "email": "ship@instantpack.nl"
+    //     }
+    // }
+
+
+    const DATA = {
+        "shipper": {
+            "countryCode": "",
+            "postalCode": "",
+            "houseNumber": "",
+            "houseNumberSuffix": "",
+            "street": "",
+            "city": "",
+            "suburb": "",
+            "additionalAddressLine": ""
+        },
+        "parcels": BARCODES.map((BARCODE: string) => {
+            return {
+                "id": crypto.randomUUID(),
+                "parcelKind": "Standard",
+                "receiverName": "",
+                "barcode": BARCODE
+            }
+        }),
+        "receipt": {
+            "email": env.DHL_EMAIL
+        }
+    };
+
+    const RESULT = (await f_wrpd_postData('https://my.dhlecommerce.nl/servicepoint-api/customer/hand-in', DATA, TOKEN, COOKIE)).return_value ;
 
     if (RESULT[0].key){
         Log.f_msg(PAGE_NAME, "f_scan", RESULT[0].key, 1);

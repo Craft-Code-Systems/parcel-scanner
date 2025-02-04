@@ -45,9 +45,11 @@ export default {
 		const LOGIN_RESPONSE: string = await DHL.f_login(env);
 		const TOKEN: string = LOGIN_RESPONSE[0];
 		const COOKIE: string = LOGIN_RESPONSE[1];
+		let barcodes: string[] = [];
 try{
 		for (let i = 0; i < SHIPMENT_DATA.length; i++) {
 			await DHL.f_scan(TOKEN, COOKIE, SHIPMENT_DATA[i].track_and_trace);
+			barcodes.push(SHIPMENT_DATA[i].track_and_trace);
 		}
 	} catch (ERROR: any) {
 		Log.f_msg(PAGE_NAME, "f_scan", ERROR, 2);
@@ -64,6 +66,26 @@ try{
 
 
 		return new Response("ERROR: " + ERROR, { status: 500, statusText: ERROR });
+	}
+
+	try{
+		await DHL.f_handin(TOKEN, COOKIE, env, barcodes);
+	} catch (ERROR: any) {
+		Log.f_msg(PAGE_NAME, "f_handin", ERROR, 2);
+
+		const URL = 'https://hooks.slack.com/services/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';
+		const DATA = { text: "Parcel Scanner Error: " + ERROR };
+		// await fetch(URL, {
+		// 	method: 'POST',
+		// 	headers: {
+		// 	  'Content-Type': 'application/json'
+		// 	},
+		// 	body: JSON.stringify(DATA)
+		//   });
+
+
+		return new Response("ERROR: " + ERROR, { status: 500, statusText: ERROR });
+
 	}
 
 
