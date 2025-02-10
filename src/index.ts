@@ -25,11 +25,11 @@ export default {
 		
 		//Get date of today in format 2024-10-22 00:00:00
 		const DATA = new Date();
-		const TODAY = DATA.getFullYear() + "-" + (DATA.getMonth() + 1) + "-" + (DATA.getDate() -1) + " 00:00:00";
-		const TOMORROW = DATA.getFullYear() + "-" + (DATA.getMonth() + 1) + "-" + (DATA.getDate() + 0) + " 00:00:00";
+		const TODAY = DATA.getFullYear() + "-" + (DATA.getMonth() + 1) + "-" + (DATA.getDate()) + " 00:00:00";
+		const TOMORROW = DATA.getFullYear() + "-" + (DATA.getMonth() + 1) + "-" + (DATA.getDate() + 1) + " 00:00:00";
 
 		const PARAMETERS: Interface.ApiParameters = {
-			seller_id:  1673,
+			seller_id:  2952,
 			start_date: TODAY,
 			end_date: TOMORROW
 			// shipment_method: url?.searchParams.get('shipment_method') ?? "",
