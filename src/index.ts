@@ -25,11 +25,11 @@ export default {
 		
 		//Get date of today in format 2024-10-22 00:00:00
 		const DATA = new Date();
-		const TODAY = DATA.getFullYear() + "-" + (DATA.getMonth() + 1) + "-" + (DATA.getDate()) + " 00:00:00";
-		const TOMORROW = DATA.getFullYear() + "-" + (DATA.getMonth() + 1) + "-" + (DATA.getDate() + 1) + " 00:00:00";
+		const TODAY = DATA.getFullYear() + "-" + (DATA.getMonth()+1) + "-" + (DATA.getDate()) + " 00:00:00";
+		const TOMORROW = DATA.getFullYear() + "-" + (DATA.getMonth()+1) + "-" + (DATA.getDate() + 1) + " 00:00:00";
 
 		const PARAMETERS: Interface.ApiParameters = {
-			seller_id:  2952,
+			seller_id:  1673,
 			start_date: TODAY,
 			end_date: TOMORROW
 			// shipment_method: url?.searchParams.get('shipment_method') ?? "",
@@ -56,13 +56,13 @@ try{
 
 		const URL = 'https://hooks.slack.com/services/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';
 		const DATA = { text: "Parcel Scanner Error: " + ERROR };
-		// await fetch(URL, {
-		// 	method: 'POST',
-		// 	headers: {
-		// 	  'Content-Type': 'application/json'
-		// 	},
-		// 	body: JSON.stringify(DATA)
-		//   });
+		await fetch(URL, {
+			method: 'POST',
+			headers: {
+			  'Content-Type': 'application/json'
+			},
+			body: JSON.stringify(DATA)
+		  });
 
 
 		return new Response("ERROR: " + ERROR, { status: 500, statusText: ERROR });
@@ -75,13 +75,13 @@ try{
 
 		const URL = 'https://hooks.slack.com/services/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';
 		const DATA = { text: "Parcel Scanner Error: " + ERROR };
-		// await fetch(URL, {
-		// 	method: 'POST',
-		// 	headers: {
-		// 	  'Content-Type': 'application/json'
-		// 	},
-		// 	body: JSON.stringify(DATA)
-		//   });
+		await fetch(URL, {
+			method: 'POST',
+			headers: {
+			  'Content-Type': 'application/json'
+			},
+			body: JSON.stringify(DATA)
+		  });
 
 
 		return new Response("ERROR: " + ERROR, { status: 500, statusText: ERROR });
