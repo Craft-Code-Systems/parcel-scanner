@@ -49,14 +49,6 @@ async function processShipments(env: any): Promise<string> {
     }
   } catch (ERROR: any) {
     Log.f_msg(PAGE_NAME, "f_scan", ERROR, 2);
-    const slackURL =
-      "https://hooks.slack.com/services/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";
-    const payload = { text: "Parcel Scanner Error: " + ERROR };
-    await fetch(slackURL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
     // Rethrow so that both scheduled and fetch handlers can handle the error similarly.
     throw new Error("Error in DHL.f_scan: " + ERROR);
   }
@@ -65,14 +57,6 @@ async function processShipments(env: any): Promise<string> {
     await DHL.f_handin(TOKEN, COOKIE, env, barcodes);
   } catch (ERROR: any) {
     Log.f_msg(PAGE_NAME, "f_handin", ERROR, 2);
-    const slackURL =
-      "https://hooks.slack.com/services/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";
-    const payload = { text: "Parcel Scanner Error: " + ERROR };
-    await fetch(slackURL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
     throw new Error("Error in DHL.f_handin: " + ERROR);
   }
 

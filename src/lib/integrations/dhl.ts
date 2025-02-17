@@ -30,14 +30,15 @@ async function f_postData(
 
   console.log("API_URL: ", API_URL);
   console.log("OPTIONS: ", JSON.stringify(OPTIONS));
+  console.log("DATA: ", JSON.stringify(DATA));
 
   try {
     const RESPONSE: Response = await fetch(API_URL, OPTIONS);
     const RESULT: any = await RESPONSE.text();
     const RESULT_COOKIES = RESPONSE.headers.get('set-cookie');
-    console.log("RESULT: ", RESPONSE);
+    console.log("RESULT: ", JSON.stringify(RESULT));
     if (!RESPONSE.ok) {
-      Log.f_msg(PAGE_NAME, "f_postData", "DHL API Error: " + RESPONSE.status + " - " + RESULT, 2);
+      Log.f_msg(PAGE_NAME, "f_postData", "DHL API Error: " + RESPONSE.status + " - " + RESULT + " - POST_DATA: " + JSON.stringify(DATA), 2);
       return [RESULT];
     }
     return [RESULT, RESULT_COOKIES];

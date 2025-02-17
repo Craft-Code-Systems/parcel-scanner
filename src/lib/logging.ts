@@ -33,8 +33,12 @@ export async function f_msg(
       console.log(LOG_MSG_SHORT);
       break;
     case 2:
+      console.error(LOG_MSG_LONG);
+      f_watchDog(LOG_MSG_SHORT);
+      break;
     case 3:
-      console.error(LOG_MSG_SHORT);
+      console.error(LOG_MSG_LONG);
+      f_watchDog(LOG_MSG_SHORT);
       break;
     case 4:
       console.warn(LOG_MSG_SHORT);
@@ -65,4 +69,15 @@ async function f_apiLogging(LOG_MSG_LONG: string, LOG_TYPE: number, LOG_MODE: nu
   } catch (ERROR) {
     console.error(ERROR);
   }
+}
+
+async function f_watchDog(MESSAGE){
+      const slackURL =
+        "https://hooks.slack.com/services/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";
+      const payload = { text: MESSAGE };
+      await fetch(slackURL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
 }
