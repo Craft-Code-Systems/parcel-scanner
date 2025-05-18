@@ -11,6 +11,7 @@ import * as DHL from "./lib/integrations/dhl";
 
 const PAGE_NAME: string = "index";
 const f_wrpd_getShipmentInfo = Wrap.f_asyncResp(f_getShipmentInfo);
+const SELLER_IDS = [3477, 1673];
 
 /**
  * Extracted business logic to process shipments.
@@ -18,48 +19,51 @@ const f_wrpd_getShipmentInfo = Wrap.f_asyncResp(f_getShipmentInfo);
  */
 async function processShipments(env: any): Promise<string> {
   // Get today's date in format: YYYY-M-D 00:00:00
-  const now = new Date();
-  const TODAY = `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()} 00:00:00`;
-  const TOMORROW = `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate() + 1} 00:00:00`;
 
-  const PARAMETERS: Interface.ApiParameters = {
-    seller_id: 1673,
-    start_date: TODAY,
-    end_date: TOMORROW,
-  };
+  for (let i = 0; i < SELLER_IDS.length; i++) {
+  
+    const now = new Date();
+    const TODAY = `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()} 00:00:00`;
+    const TOMORROW = `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate() + 1} 00:00:00`;
 
-  const shipmentResponse = await f_wrpd_getShipmentInfo(PARAMETERS, env);
-  const SHIPMENT_DATA: any[] = shipmentResponse?.return_value ?? [];
+    const PARAMETERS: Interface.ApiParameters = {
+      seller_id: SELLER_IDS[i],
+      start_date: TODAY,
+      end_date: TOMORROW,
+    };
 
-  if (SHIPMENT_DATA.length === 0) {
-    Log.f_msg(PAGE_NAME, "f_scan", "No shipments found", 2);
-    return "No shipments found";
-  }
+    const shipmentResponse = await f_wrpd_getShipmentInfo(PARAMETERS, env);
+    const SHIPMENT_DATA: any[] = shipmentResponse?.return_value ?? [];
 
-  // Log in to DHL
-  const LOGIN_RESPONSE: string = await DHL.f_login(env);
-  const TOKEN: string = LOGIN_RESPONSE[0];
-  const COOKIE: string = LOGIN_RESPONSE[1];
-  let barcodes: string[] = [];
-
-  try {
-    for (let i = 0; i < SHIPMENT_DATA.length; i++) {
-      await DHL.f_scan(TOKEN, COOKIE, SHIPMENT_DATA[i].track_and_trace);
-      barcodes.push(SHIPMENT_DATA[i].track_and_trace);
+    if (SHIPMENT_DATA.length === 0) {
+      Log.f_msg(PAGE_NAME, "f_scan", "No shipments found", 2);
+      return "No shipments found";
     }
-  } catch (ERROR: any) {
-    Log.f_msg(PAGE_NAME, "f_scan", ERROR, 2);
-    // Rethrow so that both scheduled and fetch handlers can handle the error similarly.
-    throw new Error("Error in DHL.f_scan: " + ERROR);
-  }
 
-  try {
-    await DHL.f_handin(TOKEN, COOKIE, env, barcodes);
-  } catch (ERROR: any) {
-    Log.f_msg(PAGE_NAME, "f_handin", ERROR, 2);
-    throw new Error("Error in DHL.f_handin: " + ERROR);
-  }
+    // Log in to DHL
+    const LOGIN_RESPONSE: string = await DHL.f_login(env);
+    const TOKEN: string = LOGIN_RESPONSE[0];
+    const COOKIE: string = LOGIN_RESPONSE[1];
+    let barcodes: string[] = [];
 
+    try {
+      for (let i = 0; i < SHIPMENT_DATA.length; i++) {
+        await DHL.f_scan(TOKEN, COOKIE, SHIPMENT_DATA[i].track_and_trace);
+        barcodes.push(SHIPMENT_DATA[i].track_and_trace);
+      }
+    } catch (ERROR: any) {
+      Log.f_msg(PAGE_NAME, "f_scan", ERROR, 2);
+      // Rethrow so that both scheduled and fetch handlers can handle the error similarly.
+      throw new Error("Error in DHL.f_scan: " + ERROR);
+    }
+
+    try {
+      await DHL.f_handin(TOKEN, COOKIE, env, barcodes);
+    } catch (ERROR: any) {
+      Log.f_msg(PAGE_NAME, "f_handin", ERROR, 2);
+      throw new Error("Error in DHL.f_handin: " + ERROR);
+    }
+  }
   return "DONE";
 }
 
